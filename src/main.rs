@@ -9,6 +9,11 @@ fn main() {
     println!("the hash is: {}", hash_string);
 }
 
+//struct Config {
+//    to_hash: String,
+//    count: i32,
+//}
+
 fn parse_args(args: &[String]) -> (&str, i32) {
     let to_hash = &args[1];
     let times: i32 = match args[2].parse() {
@@ -18,6 +23,10 @@ fn parse_args(args: &[String]) -> (&str, i32) {
             std::process::exit(1);
         }
     };
+//    Config {
+//        to_hash,
+//        count: times,
+//    }
     (to_hash, times)
 }
 
