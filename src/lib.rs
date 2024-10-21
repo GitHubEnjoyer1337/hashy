@@ -1,8 +1,11 @@
-use std::collections::HashMap;
-use sha2::{Digest, Sha256};
-use config::Config;
-
 pub mod config;
+pub mod hash_functions;
+
+
+use std::collections::HashMap;
+use config::Config;
+use hash_functions::*;
+
 
 type HashFunction = fn(Config) -> String;
 
@@ -33,81 +36,3 @@ pub fn run(args: Vec<String>) -> Result<String, Box<dyn std::error::Error>> {
 
     Ok(hash_function(config))
 }
-
-
-
-
-
-
-
-// appends input count times then hashes 
-fn stringapphash(config: Config) -> String {
-    let mut hasher = Sha256::new();
-    let mut inputstr = config.to_hash.to_string();
-    inputstr.push_str(&config.to_hash.repeat(config.count as usize));
-    hasher.update(&inputstr);
-    let result = hasher.finalize();
-
-    format!("{:x}", result)
-}
-
-
-
-
-
-// uses last outputhash as input for next and does this count times
-fn default_hashoi(config: Config) -> String {
-
-    let mut hasher = Sha256::new();
-    hasher.update(config.to_hash);
-
-    for _ in 0..config.count {
-        let result = hasher.finalize_reset();
-        hasher.update(result);
-    }
-    let result = hasher.finalize();
-
-    format!("{:x}", result)
-}
-
-
-
-// appends each hash to outputstring
-fn apphasho (config: Config) -> String {
-    let mut output = Sha256::new().chain_update(config.to_hash).finalize();
-    let mut result = format!("{:x}", output);
-    for _ in 0..config.count {
-        output = Sha256::new().chain_update(&output).finalize();
-        result.push_str(&format!("{:x}", output));
-    }
-    result
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
