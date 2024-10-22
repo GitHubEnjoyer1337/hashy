@@ -1,6 +1,5 @@
 use std::env;
 use testrust::run;
-use testrust::config::Config;
 
 
 fn main() {
@@ -10,11 +9,5 @@ fn main() {
         Ok(result) => println!("{}", result),
         Err(e) => eprintln!("Error: {}", e),
     }
-    let str: &str = "test";
-    let count: &str = "32";
-
-    let mexstruct = Config::build(None, str, count);
-
-    println!("{:?}", mexstruct);
 }
 

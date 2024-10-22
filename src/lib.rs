@@ -1,5 +1,6 @@
 pub mod config;
 pub mod hash_functions;
+pub mod query;
 
 
 use std::collections::HashMap;
@@ -15,13 +16,9 @@ pub fn run(args: Vec<String>) -> Result<String, Box<dyn std::error::Error>> {
     if args.len() < 3 {
         return Err("Usage: <program> [flag] <to_hash> <count>".into());
     }
-    let flags: Vec<&str> = vec!["-a", "-b"];
     let config: Config;
-    if args.len() >= 4 && flags.contains(&args[1].as_str()) {
-        config = Config::build(Some(&args[1]), &args[2], &args[3])?;
-    } else {
-        config = Config::build(None, &args[1], &args[2])?;
-    }
+    config = Config::build(&args)?;
+    println!("{:?}", &config);
 
 
     let mut flag_functions: HashMap<&str, HashFunction> = HashMap::new();
