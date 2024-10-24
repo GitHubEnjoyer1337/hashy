@@ -50,3 +50,55 @@ pub fn apphasho (config: Config) -> String {
     }
     result
 }
+
+
+
+
+
+
+pub fn query_hashoi (config: Config) -> Option<(String, usize)> {
+    let query = config.query;
+    let maxcount = config.count;
+    let mut hasher = Sha256::new();
+    hasher.update(config.to_hash.as_bytes());
+
+    for i in 0..maxcount {
+        let result = hasher.clone().finalize();
+        let hash_string = format!("{:x}", result);
+
+        if let Some(q) = query.as_ref() {
+            if hash_string.contains(q) {
+                return Some((hash_string, i));
+            }
+        }
+        
+        hasher = Sha256::new();
+        hasher.update(hash_string.as_bytes());
+    }
+
+    None
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,6 +1,5 @@
 pub mod config;
 pub mod hash_functions;
-pub mod query;
 
 
 use std::collections::HashMap;
@@ -24,6 +23,7 @@ pub fn run(args: Vec<String>) -> Result<String, Box<dyn std::error::Error>> {
     let mut flag_functions: HashMap<&str, HashFunction> = HashMap::new();
     flag_functions.insert("-a", stringapphash);
     flag_functions.insert("-b", apphasho);
+    flag_functions.insert("-s", query_hashoi);
 
     let default_function: HashFunction = default_hashoi;
 
