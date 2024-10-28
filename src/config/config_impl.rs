@@ -2,13 +2,30 @@
 
 #[derive(Debug)]
 pub struct Config<'a> {
-    pub flag: Option<&'a str>,
+    pub flag: Option<Flag>,
     pub to_hash: &'a str,
     pub count: usize,
     pub query: Option<&'a str>,
 }
 
+#[derive(Debug, PartialEq, Eq, Hash)]
+pub enum Flag {
+    A,
+    B,
+    S,
+}
 
+
+impl Flag {
+    fn from_str(s: &str) -> Option<Flag> {
+        match s {
+            "-a" => Some(Flag::A),
+            "-b" => Some(Flag::B),
+            "-s" => Some(Flag::S),
+            _ => None,
+        }
+    }
+}
 
 impl<'a> Config<'a> {
     pub fn build(stringvec: &'a [String]) -> Result<Config<'a>, Box<dyn std::error::Error>> {
@@ -16,29 +33,79 @@ impl<'a> Config<'a> {
             return Err("Usage: <program> [flag] <to_hash> <count>".into());
         }
 
-        let flags: Vec<&str> = vec!["-a", "-b", "-s"];
-
-        let (flag, to_hash, count, query) = if stringvec.len() >= 4 && flags.contains(&stringvec[1].as_str()) {
-            let flag = Some(stringvec[1].as_str());
-            if flag == Some("-s") {
-                if stringvec.len() < 5 {
-                    return Err("Not enough arguments for -s flag".into());
+        let (flag, to_hash, count, query) = if stringvec.len() >= 4 {
+            if let Some(flag) = Flag::from_str(&stringvec[1]) {
+                match flag {
+                    Flag::S => {
+                        if stringvec.len() < 5 {
+                            return Err("Not enough args for -s flag".into());
+                        }
+                        (
+                            Some(flag),
+                            stringvec[3].as_str(),
+                            Self::parse_count(&stringvec[4])?,
+                            Some(stringvec[2].as_str())
+                        )
+                    },
+                    _ => (
+                            Some(flag),
+                            stringvec[2].as_str(),
+                            Self::parse_count(&stringvec[4])?,
+                            None
+                         )
+                    }
+                } else {
+                    (
+                            None,
+                            stringvec[1].as_str(),
+                            Self::parse_count(&stringvec[2])?,
+                            None
+                    )
                 }
-                (flag, stringvec[3].as_str(), Self::parse_count(&stringvec[4])?, Some(stringvec[2].as_str()))
-            } else {
-                (flag, stringvec[2].as_str(), Self::parse_count(&stringvec[3])?, None)
-            }
         } else {
-            (None, stringvec[1].as_str(), Self::parse_count(&stringvec[2])?, None)
+            (
+                            None,
+                            stringvec[1].as_str(),
+                            Self::parse_count(&stringvec[2])?,
+                            None
+            )
         };
-
         Ok(Config { flag, to_hash, count, query })
     }
-
-    fn parse_count(s: &str) -> Result<usize, Box<dyn std::error::Error>> {
+    pub fn parse_count(s: &str) -> Result<usize, Box<dyn std::error::Error>> {
         s.parse().map_err(|_| "count must be valid (usize)".into())
-    }
+    } 
 }
+
+//impl<'a> Config<'a> {
+//    pub fn build(stringvec: &'a [String]) -> Result<Config<'a>, Box<dyn std::error::Error>> {
+//        if stringvec.len() < 3 {
+//            return Err("Usage: <program> [flag] <to_hash> <count>".into());
+//        }
+//
+//        let flags: Vec<&str> = vec!["-a", "-b", "-s"];
+//
+//        let (flag, to_hash, count, query) = if stringvec.len() >= 4 && flags.contains(&stringvec[1].as_str()) {
+//            let flag = Some(stringvec[1].as_str());
+//            if flag == Some("-s") {
+//                if stringvec.len() < 5 {
+//                    return Err("Not enough arguments for -s flag".into());
+//                }
+//                (flag, stringvec[3].as_str(), Self::parse_count(&stringvec[4])?, Some(stringvec[2].as_str()))
+//            } else {
+//                (flag, stringvec[2].as_str(), Self::parse_count(&stringvec[3])?, None)
+//            }
+//        } else {
+//            (None, stringvec[1].as_str(), Self::parse_count(&stringvec[2])?, None)
+//        };
+//
+//        Ok(Config { flag, to_hash, count, query })
+//    }
+//
+//    fn parse_count(s: &str) -> Result<usize, Box<dyn std::error::Error>> {
+//        s.parse().map_err(|_| "count must be valid (usize)".into())
+//    }
+//}
 
 
 /*impl<'a> Config<'a> {

@@ -1,4 +1,5 @@
 use crate::config::Config;
+use crate::HashResult;
 
 
 
@@ -9,14 +10,15 @@ use sha2::{Digest, Sha256};
 
 
 // appends input count times then hashes 
-pub fn stringapphash(config: Config) -> String {
+pub fn stringapphash(config: Config) -> HashResult {
     let mut hasher = Sha256::new();
     let mut inputstr = config.to_hash.to_string();
     inputstr.push_str(&config.to_hash.repeat(config.count as usize));
     hasher.update(&inputstr);
     let result = hasher.finalize();
 
-    format!("{:x}", result)
+    let formattted_result = format!("{:x}", result);
+    HashResult::StringResult(formattted_result)
 }
 
 
@@ -24,7 +26,7 @@ pub fn stringapphash(config: Config) -> String {
 
 
 // uses last outputhash as input for next and does this count times
-pub fn default_hashoi(config: Config) -> String {
+pub fn default_hashoi(config: Config) -> HashResult {
 
     let mut hasher = Sha256::new();
     hasher.update(config.to_hash);
@@ -35,20 +37,21 @@ pub fn default_hashoi(config: Config) -> String {
     }
     let result = hasher.finalize();
 
-    format!("{:x}", result)
+    let formattted_result = format!("{:x}", result);
+    HashResult::StringResult(formattted_result)
 }
 
 
 
 // appends each hash to outputstring
-pub fn apphasho (config: Config) -> String {
+pub fn apphasho (config: Config) -> HashResult {
     let mut output = Sha256::new().chain_update(config.to_hash).finalize();
     let mut result = format!("{:x}", output);
     for _ in 0..config.count {
         output = Sha256::new().chain_update(&output).finalize();
         result.push_str(&format!("{:x}", output));
     }
-    result
+    HashResult::StringResult(result)
 }
 
 
@@ -56,7 +59,7 @@ pub fn apphasho (config: Config) -> String {
 
 
 
-pub fn query_hashoi (config: Config) -> Option<(String, usize)> {
+pub fn query_hashoi (config: Config) -> HashResult {
     let query = config.query;
     let maxcount = config.count;
     let mut hasher = Sha256::new();
@@ -68,7 +71,7 @@ pub fn query_hashoi (config: Config) -> Option<(String, usize)> {
 
         if let Some(q) = query.as_ref() {
             if hash_string.contains(q) {
-                return Some((hash_string, i));
+                return HashResult::TupleResult(hash_string, i);
             }
         }
         
@@ -76,7 +79,7 @@ pub fn query_hashoi (config: Config) -> Option<(String, usize)> {
         hasher.update(hash_string.as_bytes());
     }
 
-    None
+    HashResult::StringResult(String::from("No Match"))
 }
 
 
