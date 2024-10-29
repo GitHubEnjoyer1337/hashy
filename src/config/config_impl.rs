@@ -8,6 +8,12 @@ pub struct Config<'a> {
     pub query: Option<&'a str>,
 }
 
+//#[derive(Debug)]
+//pub struct newConfig<'a> {
+//    pub 
+//}
+
+
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub enum Flag {
     A,
