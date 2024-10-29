@@ -64,6 +64,7 @@ pub fn run(args: Vec<String>) -> Result<HashResult, Box<dyn std::error::Error>> 
     let mut flag_functions: HashMap<Flag, HashFunction> = HashMap::new();
     flag_functions.insert(Flag::A, stringapphash);
     flag_functions.insert(Flag::B, apphasho);
+    flag_functions.insert(Flag::C, hashfind_start_end);
     flag_functions.insert(Flag::S, query_hashoi);
 
     let default_function: HashFunction = default_hashoi;

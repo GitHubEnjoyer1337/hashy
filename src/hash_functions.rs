@@ -4,7 +4,7 @@ use crate::HashResult;
 
 
 
-use sha2::{Digest, Sha256};
+use sha2::{digest::Digest, Sha256};
 
 
 
@@ -85,6 +85,32 @@ pub fn query_hashoi (config: Config) -> HashResult {
 
 
 
+pub fn hashfind_start_end (config: Config) -> HashResult {
+    let start = config.hash_start;
+    let end = config.hash_end;
+    let count = config.count;
+
+    let mut hasher = Sha256::new();
+    hasher.update(config.to_hash.as_bytes());
+
+    for i in 0..count {
+        let result = hasher.clone().finalize();
+        let hash_string = format!("{:x}", result);
+
+        if let Some(s) = start.as_ref() {
+            if let Some(e) = end.as_ref() {
+                if hash_string.starts_with(s) && hash_string.ends_with(e) {
+                    return HashResult::TupleResult(hash_string, i);
+                }
+            }
+        }
+
+        hasher = Sha256::new();
+        hasher.update(hash_string.as_bytes());
+    }
+
+    HashResult::StringResult(String::from("No Match"))
+}
 
 
 
