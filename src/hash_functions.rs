@@ -1,10 +1,9 @@
-use crate::config::Config;
 use crate::HashResult;
-
-
-
-
+use crate::config::Config;
 use sha2::{digest::Digest, Sha256};
+use bitcoin::secp256k1::{Secp256k1, SecretKey, PublicKey as SecpPublicKey};
+use bitcoin::{PrivateKey, PublicKey, Network};
+use bitcoin::util::address::Address;
 
 
 
@@ -12,13 +11,39 @@ use sha2::{digest::Digest, Sha256};
 // appends input count times then hashes 
 pub fn stringapphash(config: Config) -> HashResult {
     let mut hasher = Sha256::new();
-    let mut inputstr = config.to_hash.to_string();
-    inputstr.push_str(&config.to_hash.repeat(config.count as usize));
+    let inputstr = config.to_hash.repeat(config.count + 1);
     hasher.update(&inputstr);
     let result = hasher.finalize();
 
-    let formattted_result = format!("{:x}", result);
-    HashResult::StringResult(formattted_result)
+    let secp = Secp256k1::new();
+    let private_key_bytes = result.as_slice();
+
+    let secret_key = match SecretKey::from_slice(private_key_bytes) {
+        Ok(sk) => sk,
+        Err(_) => return HashResult::StringResult("Invalid private key generated.".to_string()),
+    };
+
+    let secp_public_key = SecpPublicKey::from_secret_key(&secp, &secret_key);
+
+    let private_key = PrivateKey {
+        compressed: true,
+        network: Network::Bitcoin,
+        inner: secret_key,
+    };
+
+    let public_key = PublicKey {
+        compressed: true,
+        inner: secp_public_key,
+    };
+
+    let address = Address::p2pkh(&public_key, Network::Bitcoin);
+
+    let private_key_wif = private_key.to_wif();
+
+    HashResult::KeyResult {
+        address: address.to_string(),
+        private_key: private_key_wif,
+    }
 }
 
 

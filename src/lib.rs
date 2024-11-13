@@ -1,5 +1,7 @@
 //      How to use it:
 //
+//      fn default_hashoi:
+//
 //      <program> <to_hash> <count>
 //      hashes the <to_hash> and then creates a chain of hashes, where
 //      the output of the last hash is used as the input of the next
@@ -8,11 +10,15 @@
 //      
 //
 //
+//      fn stringapphash:
+//
 //      <program> -a <to_hash> <count>
 //      appends <to_hash> <count> times to itself and then hashes the whole string
 //
 //      
 //
+//
+//      fn apphasho:
 //
 //      <program> -b <to_hash> <count>
 //      creates a string containing <count> hashes which have been created
@@ -22,6 +28,8 @@
 //
 //
 //      
+//      fn query_hashoi:
+//
 //      <program> -s <query> <to_hash> <count>
 //      cycles through each hash created in a chained manner (output = input)
 //      and checks if the <query> is contained, if it is contained it prints
@@ -30,6 +38,14 @@
 //
 //
 //
+//
+//      fn hashfind_start_end:
+//
+//      <program> -c <to_hash> <count> <hash_start> <hash_end>
+//      cycles through each hash created in a chained manner (output = input)
+//      and checks if the the start of the hash matched hash_start and if the end
+//      of the hash matched hash_end, if found prints the result and the count for the 
+//      generated hash
 //
 
 
@@ -47,6 +63,10 @@ use hash_functions::*;
 pub enum HashResult {
     StringResult(String),
     TupleResult(String, usize),
+    KeyResult {
+        address: String,
+        private_key: String,
+    },
 }
 
 type HashFunction = fn(Config) -> HashResult;
