@@ -5,16 +5,7 @@ use bitcoin::secp256k1::{Secp256k1, SecretKey, PublicKey as SecpPublicKey};
 use bitcoin::{PrivateKey, PublicKey, Network};
 use bitcoin::util::address::Address;
 
-
-
-
-// appends input count times then hashes 
-pub fn stringapphash(config: Config) -> HashResult {
-    let mut hasher = Sha256::new();
-    let inputstr = config.to_hash.repeat(config.count + 1);
-    hasher.update(&inputstr);
-    let result = hasher.finalize();
-
+pub fn sha256_to_btc( result: sha2::digest::Output<Sha256> ) -> HashResult {
     let secp = Secp256k1::new();
     let private_key_bytes = result.as_slice();
 
@@ -46,6 +37,16 @@ pub fn stringapphash(config: Config) -> HashResult {
     }
 }
 
+// appends input count times then hashes 
+pub fn stringapphash(config: Config) -> HashResult {
+    let mut hasher = Sha256::new();
+    let inputstr = config.to_hash.repeat(config.count + 1);
+    hasher.update(&inputstr);
+    let result = hasher.finalize();
+
+    sha256_to_btc(result)
+}
+
 
 
 
@@ -62,8 +63,7 @@ pub fn default_hashoi(config: Config) -> HashResult {
     }
     let result = hasher.finalize();
 
-    let formattted_result = format!("{:x}", result);
-    HashResult::StringResult(formattted_result)
+    sha256_to_btc(result)
 }
 
 
@@ -71,12 +71,17 @@ pub fn default_hashoi(config: Config) -> HashResult {
 // appends each hash to outputstring
 pub fn apphasho (config: Config) -> HashResult {
     let mut output = Sha256::new().chain_update(config.to_hash).finalize();
-    let mut result = format!("{:x}", output);
+    let mut result = Vec::new();
+    result.extend_from_slice(&output);
+
+
     for _ in 0..config.count {
         output = Sha256::new().chain_update(&output).finalize();
-        result.push_str(&format!("{:x}", output));
+        result.extend_from_slice(&output);
     }
-    HashResult::StringResult(result)
+    let final_output = Sha256::new().chain_update(&result).finalize();
+
+    sha256_to_btc(final_output)
 }
 
 
