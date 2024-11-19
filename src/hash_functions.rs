@@ -5,7 +5,7 @@ use bitcoin::secp256k1::{Secp256k1, SecretKey, PublicKey as SecpPublicKey};
 use bitcoin::{PrivateKey, PublicKey, Network};
 use bitcoin::util::address::Address;
 
-pub fn sha256_to_btc( result: sha2::digest::Output<Sha256> ) -> HashResult {
+pub fn sha256_to_btc( result: sha2::digest::Output<Sha256>, count: usize ) -> HashResult {
     let secp = Secp256k1::new();
     let private_key_bytes = result.as_slice();
 
@@ -34,8 +34,17 @@ pub fn sha256_to_btc( result: sha2::digest::Output<Sha256> ) -> HashResult {
     HashResult::KeyResult {
         address: address.to_string(),
         private_key: private_key_wif,
+        count,
     }
 }
+
+
+
+
+
+
+
+
 
 // appends input count times then hashes 
 pub fn stringapphash(config: Config) -> HashResult {
@@ -44,7 +53,7 @@ pub fn stringapphash(config: Config) -> HashResult {
     hasher.update(&inputstr);
     let result = hasher.finalize();
 
-    sha256_to_btc(result)
+    sha256_to_btc(result, config.count)
 }
 
 
@@ -63,7 +72,7 @@ pub fn default_hashoi(config: Config) -> HashResult {
     }
     let result = hasher.finalize();
 
-    sha256_to_btc(result)
+    sha256_to_btc(result, config.count)
 }
 
 
@@ -81,7 +90,7 @@ pub fn apphasho (config: Config) -> HashResult {
     }
     let final_output = Sha256::new().chain_update(&result).finalize();
 
-    sha256_to_btc(final_output)
+    sha256_to_btc(final_output, config.count)
 }
 
 
@@ -97,16 +106,19 @@ pub fn query_hashoi (config: Config) -> HashResult {
 
     for i in 0..maxcount {
         let result = hasher.clone().finalize();
-        let hash_string = format!("{:x}", result);
+        let btc_data = sha256_to_btc(result, i);
+        if let HashResult::KeyResult { ref address, ..} = btc_data {
+            let hash_string = format!("{}", address);
 
-        if let Some(q) = query.as_ref() {
-            if hash_string.contains(q) {
-                return HashResult::TupleResult(hash_string, i);
+            if let Some(q) = query.as_ref() {
+                if hash_string.contains(q) {
+                    return btc_data;
+                }
             }
-        }
         
-        hasher = Sha256::new();
-        hasher.update(hash_string.as_bytes());
+            hasher = Sha256::new();
+            hasher.update(hash_string.as_bytes());
+        }
     }
 
     HashResult::StringResult(String::from("No Match"))
@@ -125,18 +137,22 @@ pub fn hashfind_start_end (config: Config) -> HashResult {
 
     for i in 0..count {
         let result = hasher.clone().finalize();
-        let hash_string = format!("{:x}", result);
+        let btc_data = sha256_to_btc(result, i);
+        if let HashResult::KeyResult { ref address, .. } = btc_data {
+            let hash_string = address;
 
-        if let Some(s) = start.as_ref() {
-            if let Some(e) = end.as_ref() {
-                if hash_string.starts_with(s) && hash_string.ends_with(e) {
-                    return HashResult::TupleResult(hash_string, i);
+            if let Some(s) = start.as_ref() {
+                if let Some(e) = end.as_ref() {
+                    if hash_string.starts_with(s) && hash_string.ends_with(e) {
+                        return btc_data;
+                        //return HashResult::TupleResult(hash_string, i);
+                    }
                 }
             }
-        }
 
-        hasher = Sha256::new();
-        hasher.update(hash_string.as_bytes());
+            hasher = Sha256::new();
+            hasher.update(hash_string.as_bytes());
+        }
     }
 
     HashResult::StringResult(String::from("No Match"))

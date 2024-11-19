@@ -66,6 +66,7 @@ pub enum HashResult {
     KeyResult {
         address: String,
         private_key: String,
+        count: usize,
     },
 }
 
