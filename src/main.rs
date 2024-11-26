@@ -14,6 +14,7 @@ fn main() {
                 println!("Private Key (WIF): {}", private_key);
                 println!("At Iteration: {}", count);
             }
+            _ => println!("If u read this u a loser, wait fck"),
         }
         Err(e) => eprintln!("Error: {}", e),
     }
