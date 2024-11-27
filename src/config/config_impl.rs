@@ -207,7 +207,7 @@ impl<'a> Config<'a> {
         let (flag, to_hash, count, query, hash_start, hash_end) = if stringvec.len() >= 4 {
             if let Some(flag) = Flag::from_str(&stringvec[1]) {
                 match flag {
-                    Flag::C => {
+                    Flag::C | Flag::CS | Flag::CB => {
                         if stringvec.len() < 6 {
                             return Err("Not enough args for -c flag".into());
                         }
@@ -220,7 +220,7 @@ impl<'a> Config<'a> {
                             Some(stringvec[5].as_str())
                         )
                     },
-                    Flag::S => {
+                    Flag::S | Flag::SS | Flag::SB => {
                         if stringvec.len() < 5 {
                             return Err("Not enough args for -s flag".into());
                         }

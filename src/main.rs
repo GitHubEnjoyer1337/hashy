@@ -10,11 +10,11 @@ fn main() {
             testrust::HashResult::StringResult(string) => println!("{}", string),
             testrust::HashResult::TupleResult(string, number) => println!("{} {}", string, number),
             testrust::HashResult::KeyResult{ address, private_key, count } => {
-                println!("Bitcoin Address: {}", address);
+                println!("Address: {}", address);
                 println!("Private Key (WIF): {}", private_key);
                 println!("At Iteration: {}", count);
             }
-            _ => println!("If u read this u a loser, wait fck"),
+            _ => println!("If u read this u a loser, wait, fck"),
         }
         Err(e) => eprintln!("Error: {}", e),
     }
