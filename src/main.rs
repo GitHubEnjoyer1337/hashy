@@ -12,7 +12,7 @@ fn main() {
             testrust::HashResult::KeyResult{ address, private_key, count } => {
                 println!("Address: {}", address);
                 println!("Private Key (WIF): {}", private_key);
-                println!("At Iteration: {}", count);
+                println!("At Iteration: {}", count + 1);
             }
             _ => println!("If u read this u a loser, wait, fck"),
         }

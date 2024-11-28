@@ -1,14 +1,10 @@
 use crate::HashResult;
-use bitcoin::hashes::hex::ToHex;
 use sha2::digest::Output;
 use sha2::{digest::Digest, Sha256};
 use bitcoin::secp256k1::{Secp256k1, SecretKey, PublicKey as SecpPublicKey};
 use bitcoin::{PrivateKey, PublicKey, Network};
 use bitcoin::util::address::Address;
-use solana_sdk::{
-    pubkey::Pubkey,
-    signer::{keypair::Keypair, Signer},
-};
+use solana_sdk::signer::{keypair::Keypair, Signer};
 use bs58;
 
 
@@ -28,15 +24,12 @@ pub struct Config<'a> {
 pub enum Flag {
     A,
     B,
-    C,
     S,
     AB,
     BB,
-    CB,
     SB,
     AS,
     BS,
-    CS,
     SS,
 }
 
@@ -46,15 +39,12 @@ impl Flag {
         match s {
             "-a" => Some(Flag::A),
             "-b" => Some(Flag::B),
-            "-c" => Some(Flag::C),
             "-s" => Some(Flag::S),
             "-ab" => Some(Flag::AB),
             "-bb" => Some(Flag::BB),
-            "-cb" => Some(Flag::CB),
             "-sb" => Some(Flag::SB),
             "-as" => Some(Flag::AS),
             "-bs" => Some(Flag::BS),
-            "-cs" => Some(Flag::CS),
             "-ss" => Some(Flag::SS),
             _ => None,
         }
@@ -171,20 +161,16 @@ impl ToHex1 for (Output<Sha256>, usize) {
     fn to_sol(self) -> HashResult {
         let (result, count) = self;
         
-        // Convert the 32-byte hash to a 64-byte keypair buffer
         let mut keypair_bytes = [0u8; 64];
         keypair_bytes[..32].copy_from_slice(result.as_slice());
     
-        // Create a keypair from the bytes
         let keypair = match Keypair::from_bytes(&keypair_bytes) {
             Ok(kp) => kp,
             Err(_) => return HashResult::StringResult("Invalid keypair generated.".to_string()),
         };
     
-        // Get the public key (address)
         let public_key = keypair.pubkey();
     
-        // Convert the keypair to bytes and then to base58
         let private_key_b58 = bs58::encode(keypair.to_bytes()).into_string();
     
         HashResult::KeyResult {
@@ -207,19 +193,6 @@ impl<'a> Config<'a> {
         let (flag, to_hash, count, query, hash_start, hash_end) = if stringvec.len() >= 4 {
             if let Some(flag) = Flag::from_str(&stringvec[1]) {
                 match flag {
-                    Flag::C | Flag::CS | Flag::CB => {
-                        if stringvec.len() < 6 {
-                            return Err("Not enough args for -c flag".into());
-                        }
-                        (
-                            Some(flag),
-                            stringvec[2].as_str(),
-                            Self::parse_count(&stringvec[3])?,
-                            None,
-                            Some(stringvec[4].as_str()),
-                            Some(stringvec[5].as_str())
-                        )
-                    },
                     Flag::S | Flag::SS | Flag::SB => {
                         if stringvec.len() < 5 {
                             return Err("Not enough args for -s flag".into());
@@ -273,19 +246,6 @@ impl<'a> Config<'a> {
 
 
 
-//    pub fn stringapphash(&self) -> (sha2::digest::Output<Sha256>, usize) {
-//        let mut hasher = Sha256::new();
-//        let inputstr = self.to_hash.repeat(self.count + 1);
-//        hasher.update(&inputstr);
-//        let result = hasher.finalize();
-//        (result, self.count)
-//    }
-//    pub fn to_hex(result: sha2::digest::Output<Sha256>, num: usize) -> HashResult {
-//        let result1 = format!("{:x}", result);
-//        HashResult::TupleResult(result1, num)
-//    }
-
-
 
 
     pub fn to_btc( result: sha2::digest::Output<Sha256>, count: usize ) -> HashResult {
@@ -320,18 +280,6 @@ impl<'a> Config<'a> {
             count,
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
 

@@ -55,11 +55,8 @@ pub mod config;
 pub mod hash_functions;
 
 
-//use config::{Config, Flag};
-//use crate::config::{Config, Flag, StringAppHash, ToHex1};
 use crate::config::config_impl::*;
-use hash_functions::{hashfind_start_end, query_hashoi};
-use sha2::Sha256;
+use hash_functions::query_hashoi;
 
 #[derive(Debug)]
 pub enum HashResult {
@@ -72,7 +69,6 @@ pub enum HashResult {
     },
     Temp(usize),
 }
-//Sha256Result(sha2::digest::Output<Sha256>),
 
 
 
@@ -83,23 +79,18 @@ pub fn run(args: Vec<String>) -> Result<HashResult, Box<dyn std::error::Error>> 
     let config= Config::build(&args)?;
     println!("{:?}", &config);
 
-//    let hashtuple = config.stringapphash();
-//    let hashresult = hashtuple.to_hex();
     let hash_result = match config.flag {
         //sha256 flags
         Some(Flag::A) => config.stringapphash().to_hex(),
         Some(Flag::B) => config.apphasho().to_hex(),
-        Some(Flag::C) => hashfind_start_end(config),
         Some(Flag::S) => query_hashoi(config),
         //btc flags
         Some(Flag::AB) => config.stringapphash().to_btc(),
         Some(Flag::BB) => config.apphasho().to_btc(),
-        Some(Flag::CB) => hashfind_start_end(config),
         Some(Flag::SB) => query_hashoi(config),
         //sol flags
         Some(Flag::AS) => config.stringapphash().to_sol(),
         Some(Flag::BS) => config.apphasho().to_sol(),
-        Some(Flag::CS) => hashfind_start_end(config),
         Some(Flag::SS) => query_hashoi(config),
         _ => config.default_hashoi().to_hex(),
     };
